@@ -16,7 +16,7 @@ jobs:
 
       - name: Dispatcher CI
         id: dispatch
-        uses: itau-corp/unified-ci-action@v1
+        uses: billyleew/unified-ci-action@v1
 
       - name: Show plan (debug friendly)
         run: |
