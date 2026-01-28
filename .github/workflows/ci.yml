@@ -1,0 +1,51 @@
+name: Unified CI - Node MVP
+on: [push, pull_request]
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.dispatch.outputs.matrix }}
+      runtime: ${{ steps.dispatch.outputs.runtime }}
+      runtime_version: ${{ steps.dispatch.outputs.runtime_version }}
+      workdir: ${{ steps.dispatch.outputs.working_directory }}
+      plan_json: ${{ steps.dispatch.outputs.plan_json }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dispatcher CI
+        id: dispatch
+        uses: itau-corp/unified-ci-action@v1
+
+      - name: Show plan (debug friendly)
+        run: |
+          echo '${{ steps.dispatch.outputs.plan_json }}' | jq .
+
+  execute:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    name: ${{ matrix.step_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: needs.plan.outputs.runtime == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.plan.outputs.runtime_version }}
+          cache: npm
+          cache-dependency-path: ${{ needs.plan.outputs.workdir }}/package-lock.json
+
+      - name: Set Node memory (basic)
+        if: needs.plan.outputs.runtime == 'node'
+        run: echo "NODE_OPTIONS=--max-old-space-size=4096" >> $GITHUB_ENV
+
+      - name: Run stage
+        if: ${{ matrix.run != '' }}
+        working-directory: ${{ needs.plan.outputs.workdir }}
+        run: ${{ matrix.run }}

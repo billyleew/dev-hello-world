@@ -1,0 +1,14 @@
+{
+  "name": "hello-world-node",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "scripts": {
+    "test": "node test/basic.test.js",
+    "build": "node -e \"console.log('build ok')\"",
+    "start": "node index.js"
+  }
+}

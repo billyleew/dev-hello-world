@@ -1,0 +1,6 @@
+project:
+  name: "hello-world"
+  runtime: auto
+  runtime-version: auto
+  working-directory: .
+  goal: ci
